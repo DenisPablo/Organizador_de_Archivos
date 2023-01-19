@@ -13,9 +13,13 @@ def crear_carpetas():
     for fichero in directorio.iterdir():
         carpetas_existentes.add(fichero.name)
 
-    for carpeta in carpetas:
-        if carpeta not in carpetas_existentes:
-            mkdir(carpeta)
+    try:
+        for carpeta in carpetas:
+            if carpeta not in carpetas_existentes:
+            
+                mkdir(carpeta)
+    except Exception as e:
+        print(f'Ocurrio un error al crear las carpetas :( {e}')
 
 
 def verificar_directorios():
@@ -51,28 +55,51 @@ def mover_archivos():
 
     for fichero in directorio.iterdir():
         if fichero.suffix in ext_imagenes and not Path.exists(ruta / 'Imagenes' / fichero.name):
-            move(fichero, Path('Imagenes'))
-            c_imagenes += 1
+                try:
+                    move(fichero, Path('Imagenes'))
+                    c_imagenes += 1
+                except Exception as e:
+                    print(f'Ocurrio un error al mover los archivos :( {e}')
         elif fichero.suffix in ext_documetos and not Path.exists(ruta / 'Documentos' / fichero.name):
-            move(fichero, Path('Documentos'))
-            c_documentos += 1
+            try:
+                move(fichero, Path('Documentos'))
+                c_documentos += 1
+            except Exception as e:
+                    print(f'Ocurrio un error al mover los archivos :( {e}')
         elif fichero.suffix in ext_audio and not Path.exists(ruta / 'Audios' / fichero.name):
-            move(fichero, Path('Audios'))
-            c_audio += 1
+            try:
+                move(fichero, Path('Audios'))
+                c_audio += 1
+            except Exception as e:
+                    print(f'Ocurrio un error al mover los archivos :( {e}')
         elif fichero.suffix in ext_codigo and fichero.name != 'organizador.py' and not Path.exists(
                 ruta / 'Codigo' / fichero.name):
-            move(fichero, Path('Codigo'))
-            c_codigo += 1
+            try:
+                move(fichero, Path('Codigo'))
+                c_codigo += 1
+            except Exception as e:
+                    print(f'Ocurrio un error al mover los archivos :( {e}')
         elif fichero.suffix in ext_comprimidos and not Path.exists(ruta / 'Comprimidos' / fichero.name):
-            move(fichero, Path('Comprimidos'))
-            c_comprimidos += 1
+            try:
+                move(fichero, Path('Comprimidos'))
+                c_comprimidos += 1
+            except Exception as e:
+                print(f'Ocurrio un error al mover los archivos :( {e}')
+
         elif fichero.suffix == '.iso' and not Path.exists(ruta / 'Isos' / fichero.name):
-            move(fichero, Path('Isos'))
-            c_isos += 1
+            try:
+                move(fichero, Path('Isos'))
+                c_isos += 1
+            except Exception as e:
+                print(f'Ocurrio un error al mover los archivos :( {e}')
+
         elif fichero.name not in carpetas and fichero.name != 'organizador.py' and not Path.exists(
                 ruta / 'Otros' / fichero.name) and fichero.suffix != "":
-            move(fichero, Path('Otros'))
-            desconocidos += 1
+            try:
+                move(fichero, Path('Otros'))
+                desconocidos += 1
+            except Exception as e:
+                print(f'Ocurrio un error al mover los archivos :( {e}')
 
     print("Operacion finalizada:")
     print(f"Total de Imagenes movidas: [{c_imagenes}]")
@@ -85,7 +112,8 @@ def mover_archivos():
     print(
         f"Total de archivos movidos: [{c_imagenes + c_isos + c_documentos + c_audio + c_codigo + c_comprimidos + desconocidos}]")
 
-if verificar_directorios():
-    mover_archivos()
-else:
-    print("Error al ejercutar")
+if __name__ == "main":
+    if verificar_directorios():
+        mover_archivos()
+    else:
+        print("Error al ejercutar")

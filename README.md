@@ -1,15 +1,35 @@
-# Organizador_de_Archivos
+# Organizador de Archivos
 
-El script debe colocarse en la raiz del directorio donde se quiera usar.
+Este script se creó con el objetivo de organizar de forma rápida y cómoda archivos sueltos dentro de una carpeta. El script crea automáticamente las carpetas y mueve los archivos a las carpetas específicas según su extensión.
 
-Al ejecutarlo este buscara las carpetas por defecto donde se moveran los archivos, en caso de no existir preguntara si las desea crear. 
+**ADVERTENCIA:** Es importante no cambiar el nombre de los archivos antes de ejecutar el script ya que esto puede causar que los archivos no sean movidos correctamente. El script debe ser ejecutado desde la raíz de la carpeta que desea organizar. Si se encuentran archivos repetidos, primero se moverán a la carpeta "Otros" y si ya existen en esa carpeta, se ignorarán y no serán movidos.
 
-Una vez creadas procedera a recorrer todos lo archivos en el directorio y los movera a la carpeta que corresponda segun su extension.
+## Carpetas creadas
 
-en caso de que la extension no este definida los movera a la carpeta Otros.
+- Imagenes
+- Documentos
+- Audio
+- Codigo
+- Comprimidos
+- Isos
+- Otros
 
-Consideraciones:
+## Extensiones soportadas
 
-Cuando el archivo se encuentra duplicado ira a la carpeta Otros y si este ya existe tambien en esa carpeta lo dejara en el directorio raiz.
+- Extensiones de imagen: .jpg, .png, .jpeg
+- Extensiones de documentos: .pdf, .txt, .doc, .docx, .xlsx
+- Extensiones de audio: .mp3, .ogg, .vma, .m4r
+- Extensiones de codigo: .cpp, .py
+- Extensiones comprimidos: .rar, .zip
 
-El nombre del Script no debe ser modificado o sera movido dentro de Codigos, para hacerlo correctamente modifique el codigo para que omita el nuevo nombre.
+## Como usar
+
+1. Descargue el script y colóquelo en la carpeta raíz que desea organizar
+2. Ejecute el script
+3. Siga las instrucciones en pantalla
+
+## Requisitos
+
+- Python 3.x
+- shutil
+- pathlib
