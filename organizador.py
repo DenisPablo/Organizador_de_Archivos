@@ -11,6 +11,24 @@ from pathlib import Path
 from shutil import move
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+import logging
+
+from pathlib import Path
+from logging.handlers import TimedRotatingFileHandler
+
+log_file_path = Path('C:/Users/denis/OneDrive/Documentos/Documentos/organizador_service.log')
+handler = TimedRotatingFileHandler(log_file_path, when='midnight', interval=1, backupCount=7)
+logging.basicConfig(level=logging.INFO)
+
+# Crea un objeto de registrador
+logger = logging.getLogger(__name__)
+
+# Agrega el manejador al registrador
+logger.addHandler(handler)
+
+# Ahora puedes usar el registrador para escribir mensajes de registro
+logger.info('El servicio ha comenzado')
+
 
 class OrganizadorService(win32serviceutil.ServiceFramework):
     _svc_name_ = 'OrganizadorArchivosService'
@@ -103,7 +121,7 @@ def organizador_archivos(directorio_raiz):
             if not destino.exists():
                 move(elemento, destino)
         except Exception as e:
-            print(f'Error al mover {elemento.name}: {e}')
+            logging.error(f'Error al procesar {elemento.name}: {e}')
 
 if __name__ == '__main__':
 
