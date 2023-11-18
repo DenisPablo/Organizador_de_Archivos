@@ -5,48 +5,18 @@ from pathlib import Path
 from shutil import move
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-import sys
-import servicemanager
-import win32event
-import win32service
-import win32serviceutil
-import threading
-
-class OrganizadorService(win32serviceutil.ServiceFramework):
-    # ... (otro código del servicio)
-
-    def main(self):
-        ruta_directorio_raiz = Path(r'C:\Users\denis\OneDrive\Documentos')
-        handler = Organizador_de_archivos_handler(ruta_directorio_raiz)
-        observer = Observer()
-        observer.schedule(handler, path=ruta_directorio_raiz, recursive=False)
-        observer.start()
-
-        try:
-            print(f'Observado el directorio: {ruta_directorio_raiz}')
-            # Usar un evento para esperar la señal de detención
-            self.stop_event = threading.Event()
-            self.stop_event.wait()  # Espera hasta que se reciba la señal de detención
-        except KeyboardInterrupt:
-            observer.stop()
-
-        observer.join()
-
-    def SvcStop(self, args):
-        self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
-        # Establece el evento para indicar que el servicio debe detenerse
-        self.stop_event.set()
-
 
 class Organizador_de_archivos_handler(FileSystemEventHandler):
     def __init__(self, directorio_raiz):
         super().__init__()
         self.directorio_raiz = directorio_raiz
-    
-    def on_created(self, event):  
+
+    def on_created(self, event):
+        if event.is_directory:
+            return  # Ignorar directorios creados
+
         print(f'Nuevo archivo detectado: {event.src_path}')
         organizador_archivos(self.directorio_raiz)
-
 
 def organizador_archivos(directorio_raiz):
     carpetas_extensiones = {
@@ -94,26 +64,7 @@ def organizador_archivos(directorio_raiz):
         except Exception as e:
             print(f'Error al mover {elemento.name}: {e}')
 
-class OrganizadorService(win32serviceutil.ServiceFramework):
-    _svc_name_ = 'OrganizadorArchivosService'
-    _svc_display_name_ = 'Organizador de Archivos Service'
-
-    def __init__(self, args):
-        win32serviceutil.ServiceFramework.__init__(self, args)
-        self.hWaitStop = win32event.CreateEvent(None,0,0,None)
-
-    def SvcStop(self):
-        self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
-        win32event.SetEvent(self.hWaitStop)
-    
-    def SvcDoRun(self):
-        servicemanager.LogMsg(servicemanager.EVENTLOG_INFORMATION_TYPE,
-                            servicemanager.PYS_SERVICE_STARTED,
-                            (self._svc_name_, ''))
-        
-        self.main()
-
-    def main(self):
+if __name__ == '__main__':
         ruta_directorio_raiz = Path(r'C:\Users\denis\OneDrive\Documentos')
         handler = Organizador_de_archivos_handler(ruta_directorio_raiz)
         observer = Observer()
@@ -121,20 +72,9 @@ class OrganizadorService(win32serviceutil.ServiceFramework):
         observer.start()
 
         try:
-            print(f'Observado el directorio: {ruta_directorio_raiz}')
-            # Usar un evento para esperar la señal de detención
-            self.stop_event = threading.Event()
-            self.stop_event.wait()  # Espera hasta que se reciba la señal de detención
+            print(f'Observando el directorio: {ruta_directorio_raiz}')
+            observer.join(timeout=1)
         except KeyboardInterrupt:
             observer.stop()
 
-
         observer.join()
-
-if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        servicemanager.Initialize()
-        servicemanager.PrepareToHostSingle(OrganizadorService)
-        servicemanager.StartServiceCtrlDispatcher()
-    else:
-        win32serviceutil.HandleCommandLine(OrganizadorService)
