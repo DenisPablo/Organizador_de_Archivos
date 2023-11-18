@@ -1,119 +1,56 @@
+# El script analiza un directorio en concreto y organizara los archivos en su interior siguiendo las siguientes reglas:
+# si el archivo no tiene una extension contemplada por el script ira a la carpeta otros y las carpetas que no esten dentro del diccionario tambien iran a otros
+
 from pathlib import Path
 from shutil import move
-from os import mkdir
 
-carpetas = {'Imagenes', 'Documentos', 'Audio', 'Codigo', 'Comprimidos', 'Isos', 'Otros'}
-ruta = Path().absolute()
-directorio = Path(ruta)
+def organizador_archivos(directorio_raiz):
+    carpetas_extensiones = {
+        '.jpg': 'Imagenes',
+        '.png': 'Imagenes',
+        '.jpeg': 'Imagenes',
+        '.pdf': 'Documentos',
+        '.txt': 'Documentos',
+        '.doc': 'Documentos', 
+        '.docx': 'Documentos', 
+        '.xlsx': 'Documentos', 
+        '.mp3': 'Audio',
+        '.ogg': 'Audio', 
+        '.vma': 'Audio', 
+        '.m4r': 'Audio', 
+        '.cpp': 'Codigo', 
+        '.py': 'Codigo',
+        '.rar': 'Comprimido', 
+        '.zip': 'Comprimido', 
+    }
+
+    # Crea las carpetas incluidas en el diccionario para cada clasificacion de archivos.
+    for carpeta in set(carpetas_extensiones.values()):
+        (directorio_raiz / carpeta).mkdir(exist_ok = True)
+
+    # Crea la carpeta "Otros" donde iran todo aquellos archivos con extensiones no contempladas asi como carpetas ajenas al script 
+    carpeta_otros = 'Otros'
+    (directorio_raiz / carpeta_otros).mkdir(exist_ok=True)
 
 
-def crear_carpetas():
-    carpetas_existentes = set()
-
-    for fichero in directorio.iterdir():
-        carpetas_existentes.add(fichero.name)
-
-    try:
-        for carpeta in carpetas:
-            if carpeta not in carpetas_existentes:
-            
-                mkdir(carpeta)
-    except Exception as e:
-        print(f'Ocurrio un error al crear las carpetas :( {e}')
-
-
-def verificar_directorios():
-    contador = 0
-
-    for fichero in directorio.iterdir():
-        if fichero.name in carpetas:
-            contador += 1
-
-    if contador != len(carpetas):
-        if input("Faltan Carpetas desea crearlas: [Y]es / [N]o: ").upper() == 'Y':
-            crear_carpetas()
+    for elemento in directorio_raiz.iterdir():
+        if elemento.is_file():
+            carpeta_destino = carpetas_extensiones.get(elemento.suffix, carpeta_otros)
+        elif elemento.is_dir() and elemento.name() not in set(carpetas_extensiones.values()):
+            carpeta_destino = carpeta_otros
         else:
-            return False
+            continue
 
-    return True
+        # Crea la ruta de destino
+        destino = directorio_raiz / carpeta_destino / elemento.name
 
+        try:
+            if not destino.exists():
+                move(elemento, destino)
+        except Exception as e:
+            print(f'Error al mover {elemento.name}: {e}')
 
-def mover_archivos():
-    c_imagenes = 0
-    c_documentos = 0
-    c_audio = 0
-    c_codigo = 0
-    c_comprimidos = 0
-    c_isos = 0
-    desconocidos = 0
+if __name__ == '__main__':
+    ruta_directorio_raiz = Path(r'C:\Users\denis\OneDrive\Documentos')
 
-    ext_imagenes = ['.jpg', '.png', '.jpeg']
-    ext_documetos = ['.pdf', '.txt', '.doc', '.docx', '.xlsx']
-    ext_audio = ['.mp3', '.ogg', '.vma', '.m4r']
-    ext_codigo = ['.cpp', '.py']
-    ext_comprimidos = ['.rar', '.zip']
-
-    for fichero in directorio.iterdir():
-        if fichero.suffix in ext_imagenes and not Path.exists(ruta / 'Imagenes' / fichero.name):
-                try:
-                    move(fichero, Path('Imagenes'))
-                    c_imagenes += 1
-                except Exception as e:
-                    print(f'Ocurrio un error al mover los archivos :( {e}')
-        elif fichero.suffix in ext_documetos and not Path.exists(ruta / 'Documentos' / fichero.name):
-            try:
-                move(fichero, Path('Documentos'))
-                c_documentos += 1
-            except Exception as e:
-                    print(f'Ocurrio un error al mover los archivos :( {e}')
-        elif fichero.suffix in ext_audio and not Path.exists(ruta / 'Audios' / fichero.name):
-            try:
-                move(fichero, Path('Audios'))
-                c_audio += 1
-            except Exception as e:
-                    print(f'Ocurrio un error al mover los archivos :( {e}')
-        elif fichero.suffix in ext_codigo and fichero.name != 'organizador.py' and not Path.exists(
-                ruta / 'Codigo' / fichero.name):
-            try:
-                move(fichero, Path('Codigo'))
-                c_codigo += 1
-            except Exception as e:
-                    print(f'Ocurrio un error al mover los archivos :( {e}')
-        elif fichero.suffix in ext_comprimidos and not Path.exists(ruta / 'Comprimidos' / fichero.name):
-            try:
-                move(fichero, Path('Comprimidos'))
-                c_comprimidos += 1
-            except Exception as e:
-                print(f'Ocurrio un error al mover los archivos :( {e}')
-
-        elif fichero.suffix == '.iso' and not Path.exists(ruta / 'Isos' / fichero.name):
-            try:
-                move(fichero, Path('Isos'))
-                c_isos += 1
-            except Exception as e:
-                print(f'Ocurrio un error al mover los archivos :( {e}')
-
-        elif fichero.name not in carpetas and fichero.name != 'organizador.py' and not Path.exists(
-                ruta / 'Otros' / fichero.name) and fichero.suffix != "":
-            try:
-                move(fichero, Path('Otros'))
-                desconocidos += 1
-            except Exception as e:
-                print(f'Ocurrio un error al mover los archivos :( {e}')
-
-    print("Operacion finalizada:")
-    print(f"Total de Imagenes movidas: [{c_imagenes}]")
-    print(f"Total de Documentos movidos: [{c_documentos}]")
-    print(f"Total de Audios movidos: [{c_audio}]")
-    print(f"Total de archivos de Codificacion movidos: [{c_codigo}].")
-    print(f"Total de archivos Comprimidos movidos: [{c_comprimidos}]")
-    print(f"Total de archivos Isos movidos: [{c_isos}]")
-    print(f"[{desconocidos}] No pudieron ser identificados.")
-    print(
-        f"Total de archivos movidos: [{c_imagenes + c_isos + c_documentos + c_audio + c_codigo + c_comprimidos + desconocidos}]")
-
-if __name__ == "main":
-    if verificar_directorios():
-        mover_archivos()
-    else:
-        print("Error al ejercutar")
+    organizador_archivos(ruta_directorio_raiz)
